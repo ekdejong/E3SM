@@ -41,6 +41,10 @@ OUTPUTS = ('qc2qr_autoconv_tend', 'qc2qr_accret_tend', 'ncautr', 'nc2nr_autoconv
 
 # Rain gamma shape given to the ROM: keep equal to p3::constant_mu_rain
 MU_R = 1.0
+# Fall back on P3 for cells with only small liquid water or tiny droplets
+R_MEAN_MIN = 3e-6 # 3 um
+Q_LIQ_MIN = 1e-5  # Minimum liquid water content [kg/kg]
+RHOW = 1000.0  # Reference density of water [kg/m3]
 
 
 class RomWarmRain(nn.Module):
@@ -53,6 +57,9 @@ class RomWarmRain(nn.Module):
             self.rom = torch.jit.load(model_file, map_location='cpu')
         self.rom.eval()
         self.mu_r = MU_R
+        self.q_liq_min = Q_LIQ_MIN
+        self.r_mean_min = R_MEAN_MIN
+        self.rhow = RHOW
         # The rates are means over this period [s]: the model is meant for P3 steps of this length
         self.target_period_s = float(self.rom.dt)
 
@@ -73,8 +80,15 @@ class RomWarmRain(nn.Module):
         dqc, dNc, dNr = dqc * inv_rho, dNc * inv_rho, dNr * inv_rho  # per kg of dry air
 
         zero = torch.zeros_like(qc)
-        # Where there is liquid the ROM replaces P3; elsewhere P3's rates are zero anyway
-        liquid = ((qc > 0) | (qr > 0)).double()
+        # Where there is sufficient liquid and large enough droplets the ROM replaces P3
+        has_c, has_r = qc > 0, qr > 0
+        q_liq = torch.where(has_c, qc, zero) + torch.where(has_r, qr, zero)
+        n_liq = torch.where(has_c, nc, zero) + torch.where(has_r, nr, zero)
+        has_drops = n_liq > 0
+        n_safe = torch.where(has_drops, n_liq, torch.ones_like(n_liq))  # avoid division by zero
+        r_mean = torch.pow(3.0 * q_liq / (4.0 * 3.141593 * self.rhow * n_safe), 1.0 / 3.0)
+        rom_ok = (has_c | has_r) & has_drops & (q_liq > self.q_liq_min) & (r_mean > self.r_mean_min)
+        use = rom_ok.double()
         return (torch.clamp(-dqc, min=0.0),   # qc2qr_autoconv_tend
                 zero,                         # qc2qr_accret_tend
                 torch.clamp(dNr, min=0.0),    # ncautr
@@ -82,8 +96,8 @@ class RomWarmRain(nn.Module):
                 zero,                         # nc_accret_tend
                 torch.clamp(dNc, max=0.0),    # nc_selfcollect_tend
                 torch.clamp(-dNr, min=0.0),   # nr_selfcollect_tend
-                liquid,                       # use_cloud
-                liquid)                       # use_rain
+                use,                       # use_cloud
+                use)                       # use_rain
 
 
 class PythonBackendEmulator:
