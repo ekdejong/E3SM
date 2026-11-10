@@ -111,3 +111,34 @@ CreateCase(sdm true sdm_warm_rain ${EMULATOR_DIR}/sdm_warm_rain.pt 0.36 "${RANKS
 if (TEST_RANK_END GREATER 1)
   CompareCases(sdm_np1_vs_np${TEST_RANK_END} sdm 1 sdm ${TEST_RANK_END} 1e-4)
 endif()
+
+# The AE-SINDy collision ROM (rom_warm_rain.py, rom_warm_rain.pt). It replaces
+# P3's collision rates wherever there is liquid, and reports all of its mass
+# conversion as autoconversion.
+CreateCase(rom true rom_warm_rain ${EMULATOR_DIR}/rom_warm_rain.pt 1.0 "${RANKS}" true)
+add_test (NAME ${TEST_BASE_NAME}_rom_check
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/check_synthetic.py rom
+          ${TEST_BASE_NAME}_rom.INSTANT.nsteps_x1.np1.${RUN_T0}.nc
+          ${TEST_BASE_NAME}_stock.INSTANT.nsteps_x1.np1.${RUN_T0}.nc
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(${TEST_BASE_NAME}_rom_check PROPERTIES
+  LABELS "p3;physics"
+  FIXTURES_REQUIRED "${TEST_BASE_NAME}_rom_np1_omp1;${TEST_BASE_NAME}_stock_np1_omp1")
+# Different batch sizes change round-off, which can flip one of the adaptive
+# integrator's accept/reject decisions: compare ranks to a tolerance, as for sdm.
+if (TEST_RANK_END GREATER 1)
+  CompareCases(rom_np1_vs_np${TEST_RANK_END} rom 1 rom ${TEST_RANK_END} 1e-4)
+endif()
+
+# The ROM with its fallback on P3 (warm_rain_emulator_replaces_p3: false): P3's own
+# rates where there is too little liquid, the drops are too small, there are no
+# drops, or the cloud tail above the split radius outnumbers the rain drops
+CreateCase(rom_fallback true rom_warm_rain ${EMULATOR_DIR}/rom_warm_rain.pt 1.0 1)
+add_test (NAME ${TEST_BASE_NAME}_rom_fallback_check
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/check_synthetic.py rom_fallback
+          ${TEST_BASE_NAME}_rom_fallback.INSTANT.nsteps_x1.np1.${RUN_T0}.nc
+          ${TEST_BASE_NAME}_stock.INSTANT.nsteps_x1.np1.${RUN_T0}.nc
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(${TEST_BASE_NAME}_rom_fallback_check PROPERTIES
+  LABELS "p3;physics"
+  FIXTURES_REQUIRED "${TEST_BASE_NAME}_rom_fallback_np1_omp1;${TEST_BASE_NAME}_stock_np1_omp1")

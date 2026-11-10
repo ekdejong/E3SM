@@ -117,9 +117,9 @@ class RomWarmRain(nn.Module):
         return (torch.clamp(-dqc, min=0.0),   # qc2qr_autoconv_tend
                 zero,                         # qc2qr_accret_tend
                 torch.clamp(dNr, min=0.0),    # ncautr
-                zero,                         # nc2nr_autoconv_tend
+                torch.clamp(-dNc, min=0.0),   # nc2nr_autoconv_tend
                 zero,                         # nc_accret_tend
-                torch.clamp(dNc, max=0.0),    # nc_selfcollect_tend
+                zero,                         # nc_selfcollect_tend
                 torch.clamp(-dNr, min=0.0),   # nr_selfcollect_tend
                 use,                          # use_cloud
                 use)                          # use_rain
