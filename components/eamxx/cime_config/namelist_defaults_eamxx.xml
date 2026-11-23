@@ -269,6 +269,7 @@ be lost if SCREAM_HACK_XML is not enabled.
       <warm_rain_emulator_autoconv_fallback_scale type="real" doc="Factor applied to P3's autoconversion where the warm-rain emulator does not apply">1.0</warm_rain_emulator_autoconv_fallback_scale>
       <warm_rain_emulator_replaces_p3 type="logical" doc="P3 does not compute its own warm-rain collision rates and uses the emulator's in every cell, whatever the emulator's masks say (the fallback scale is then unused). Only for emulators meant to apply everywhere">false</warm_rain_emulator_replaces_p3>
       <warm_rain_emulator_cloud_self_collection type="logical" doc="Use the droplet self-collection of the warm-rain emulator (it is zero in P3)">true</warm_rain_emulator_cloud_self_collection>
+      <extra_warm_rain_emulator_diags type="logical" doc="Output diagnostics of the warm-rain emulator: P3's own warm-rain rates (fields warm_rain_p3_*) and the emulator's (warm_rain_emu_*), cell averages before the merge, and where the emulator's are used (warm_rain_emu_use_cloud, warm_rain_emu_use_rain: 0 or 1). Needs use_warm_rain_emulator">false</extra_warm_rain_emulator_diags>
     </p3>
 
     <!-- SHOC macrophysics -->

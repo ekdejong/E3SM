@@ -117,7 +117,8 @@ Int Functions<Real,DefaultDevice>
   const WorkspaceManager& workspace_mgr,
   Int nj,
   Int nk,
-  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain)
+  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain,
+  const P3WarmRainRates<view_2d<Pack>>& warm_rain_diags)
 {
   using ExeSpace = typename KT::ExeSpace;
 
@@ -304,7 +305,7 @@ Int Functions<Real,DefaultDevice>
     qv2qi_vapdep, qc2qi_berg, qc2qr_ice_shed, qc2qi_collect,
     qr2qi_collect, qc2qi_hetero_freeze, qr2qi_immers_freeze, qi2qr_melt,
     pratot, prctot, nucleationPossible, hydrometeorsPresent, runtime_options,
-    emulated_warm_rain);
+    emulated_warm_rain, warm_rain_diags);
 
   //NOTE: At this point, it is possible to have negative (but small) nc, nr, ni.  This is not
   //      a problem; those values get clipped to zero in the sedimentation section (if necessary).

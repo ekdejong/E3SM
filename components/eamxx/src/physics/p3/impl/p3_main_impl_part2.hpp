@@ -108,7 +108,8 @@ void Functions<S,D>
   const uview_1d<Pack>& prctot,
   bool& hydrometeorsPresent, const Int& nk,
   const P3Runtime& runtime_options,
-  const P3WarmRainRates<uview_1d<const Pack>>& emulated_warm_rain)
+  const P3WarmRainRates<uview_1d<const Pack>>& emulated_warm_rain,
+  const P3WarmRainRates<uview_1d<Pack>>& warm_rain_diags)
 {
   constexpr Scalar qsmall       = C::QSMALL;
   constexpr Scalar nsmall       = C::NSMALL;

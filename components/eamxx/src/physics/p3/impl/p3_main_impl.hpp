@@ -85,7 +85,8 @@ Int Functions<S,D>
   const WorkspaceManager& workspace_mgr,
   Int nj,
   Int nk,
-  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain)
+  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain,
+  const P3WarmRainRates<view_2d<Pack>>& warm_rain_diags)
 {
   if (runtime_options.use_warm_rain_emulator) {
     const auto& emu = emulated_warm_rain;
@@ -401,7 +402,8 @@ Int Functions<S,D>
   const WorkspaceManager& workspace_mgr,
   Int nj,
   Int nk,
-  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain)
+  const P3WarmRainRates<view_2d<Pack>>& emulated_warm_rain,
+  const P3WarmRainRates<view_2d<Pack>>& warm_rain_diags)
 {
 #ifdef SCREAM_P3_SMALL_KERNELS
   return p3_main_internal_disp(runtime_options,

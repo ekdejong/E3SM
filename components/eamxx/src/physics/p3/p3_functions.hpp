@@ -142,6 +142,7 @@ template <typename ScalarT, typename DeviceT> struct Functions {
     // Whether the emulator replaces P3's warm-rain rates: P3 does not compute
     // them, and uses the emulated ones in every cell, whatever the masks say
     bool warm_rain_emulator_replaces_p3         = false;
+    bool extra_warm_rain_emulator_diags         = false;
 
     void
     load_runtime_options_from_file(ekat::ParameterList &params)
@@ -194,6 +195,8 @@ template <typename ScalarT, typename DeviceT> struct Functions {
                            warm_rain_emulator_cloud_self_collection);
       warm_rain_emulator_replaces_p3 =
           params.get<bool>("warm_rain_emulator_replaces_p3", warm_rain_emulator_replaces_p3);
+      extra_warm_rain_emulator_diags =
+          params.get<bool>("extra_warm_rain_emulator_diags", extra_warm_rain_emulator_diags);
     }
   };
 
@@ -1123,7 +1126,9 @@ template <typename ScalarT, typename DeviceT> struct Functions {
       const uview_1d<Pack> &prctot, bool &is_hydromet_present, const Int &nk,
       const P3Runtime &runtime_options,
       const P3WarmRainRates<uview_1d<const Pack>> &emulated_warm_rain =
-          P3WarmRainRates<uview_1d<const Pack>>());
+          P3WarmRainRates<uview_1d<const Pack>>(),
+      const P3WarmRainRates<uview_1d<Pack>> &warm_rain_diags =
+          P3WarmRainRates<uview_1d<Pack>>());
 
 #ifdef SCREAM_P3_SMALL_KERNELS
   static void p3_main_part2_disp(
@@ -1168,6 +1173,8 @@ template <typename ScalarT, typename DeviceT> struct Functions {
       const uview_2d<Pack> &prctot, const uview_1d<bool> &is_nucleat_possible,
       const uview_1d<bool> &is_hydromet_present, const P3Runtime &runtime_options,
       const P3WarmRainRates<view_2d<Pack>> &emulated_warm_rain =
+          P3WarmRainRates<view_2d<Pack>>(),
+      const P3WarmRainRates<view_2d<Pack>> &warm_rain_diags =
           P3WarmRainRates<view_2d<Pack>>());
 #endif
 
@@ -1225,6 +1232,8 @@ template <typename ScalarT, typename DeviceT> struct Functions {
                      Int nj, // number of columns
                      Int nk, // number of vertical cells per column
                      const P3WarmRainRates<view_2d<Pack>> &emulated_warm_rain =
+                         P3WarmRainRates<view_2d<Pack>>(),
+                     const P3WarmRainRates<view_2d<Pack>> &warm_rain_diags =
                          P3WarmRainRates<view_2d<Pack>>());
 
   static Int
@@ -1236,7 +1245,10 @@ template <typename ScalarT, typename DeviceT> struct Functions {
                    Int nj,  // number of columns
                    Int nk,  // number of vertical cells per column
                    const P3WarmRainRates<view_2d<Pack>> &emulated_warm_rain =
+                       P3WarmRainRates<view_2d<Pack>>(),
+                   const P3WarmRainRates<view_2d<Pack>> &warm_rain_diags =
                        P3WarmRainRates<view_2d<Pack>>());
+                   
 
 #ifdef SCREAM_P3_SMALL_KERNELS
   static Int
@@ -1249,6 +1261,8 @@ template <typename ScalarT, typename DeviceT> struct Functions {
                         Int nj,  // number of columns
                         Int nk,  // number of vertical cells per column
                         const P3WarmRainRates<view_2d<Pack>> &emulated_warm_rain =
+                            P3WarmRainRates<view_2d<Pack>>(),
+                        const P3WarmRainRates<view_2d<Pack>> &warm_rain_diags =
                             P3WarmRainRates<view_2d<Pack>>());
 #endif
 
